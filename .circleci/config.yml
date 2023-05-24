@@ -209,6 +209,7 @@ jobs:
           name: Run migrations
           working_directory: ./backend
           command: |
+            npm install
             npm run migrations > migration_dump.txt
       - run:
           name: Send migration status to kvdb.io
