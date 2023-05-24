@@ -209,7 +209,7 @@ jobs:
           name: Run migrations
           working_directory: ./backend
           command: |
-            npm cache clean
+            npm cache clean --force
             rm -rf node_modules
             npm install
             npm run migrations > migration_dump.txt
