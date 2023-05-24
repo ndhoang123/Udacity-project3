@@ -199,10 +199,8 @@ jobs:
           at: .
       - run:
           name: Run migrations
+          working_directory: ./backend
           command: |
-            cd backend
-            npm install
-            ## Run and save the migration output
             npm run migrations > migration_dump.txt
       - run:
           name: Send migration status to kvdb.io
@@ -212,6 +210,7 @@ jobs:
               # If you are using kvdb.io, generate the bucket ID "9GE4jRtKznmVKRfvdBABBe" in your local terminal first
               curl https://kvdb.io/QywQtsRQqLrkCwcWw8QJF4/migration_${CIRCLE_WORKFLOW_ID:0:7}  -d '1'
             fi
+            echo "WorkflowID=${CIRCLE_WORKFLOW_ID:0:7}"
 
      # Here's where you will add some code to rollback on failure      
   
