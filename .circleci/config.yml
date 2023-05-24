@@ -207,8 +207,8 @@ jobs:
             sudo ./aws/install
       - run:
           name: Run migrations
-          working_directory: ./backend
           command: |
+            cd backend
             # Install dependencies
             npm install
             # Run and save the migration output
