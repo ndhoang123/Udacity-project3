@@ -41,7 +41,7 @@ commands:
           name: Revert migrations
           working_directory: ./backend
           command: |
-            SUCCESS=$(curl -H "token: 2a9e15d6-b9fa-4b1f-a5dc-e3b9643a9b63" --request GET https://kvdb.io/XLkXMX5HAgByWL3MvGnZFK/migration_<< parameters.id >>)
+            SUCCESS=$(curl -H "token: JppwagkSZ7URKBoyNqtUck" --request GET https://kvdb.io/JppwagkSZ7URKBoyNqtUck/migration_<< parameters.id >>)
             echo $SUCCESS
             if [[ "$SUCCESS" == "success" ]]
             then
@@ -242,7 +242,7 @@ jobs:
             if grep -q "has been executed successfully." ~/project/backend/migrations_dump.txt
             then
               # If you are using kvdb.io, generate the bucket ID "9GE4jRtKznmVKRfvdBABBe" in your local terminal first
-              curl https://kvdb.io/XLkXMX5HAgByWL3MvGnZFK/migration_${CIRCLE_WORKFLOW_ID:0:7}  -d '1'
+              curl https://kvdb.io/JppwagkSZ7URKBoyNqtUck/migration_${CIRCLE_WORKFLOW_ID:0:7}  -d '1'
             fi
             echo "WorkflowID=${CIRCLE_WORKFLOW_ID:0:7}"
 
@@ -265,7 +265,6 @@ jobs:
             sudo ./aws/install
       - run:
           name: Get backend url
-          working_directory: ./frontend
           command: |
             export BACKEND_IP=$(aws ec2 describe-instances --query 'Reservations[*].Instances[*].PublicIpAddress' --filters "Name=tag:project,Values=udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}" --output text)
             export API_URL="http://${BACKEND_IP}:3030"
