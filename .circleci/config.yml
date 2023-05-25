@@ -346,19 +346,6 @@ jobs:
             pip install awscli
 
       - run:
-          name: Backend smoke test.
-          command: |
-            export BACKEND_IP=$(aws ec2 describe-instances --query 'Reservations[*].Instances[*].PublicIpAddress' --filters "Name=tag:project,Values=udapeople" --output text)
-            export API_URL="http://${BACKEND_IP}:3030"
-            echo "${API_URL}"
-            if curl "${API_URL}/api/status" | grep "ok"
-            then
-              return 0
-            else
-              return 1
-            fi
-
-      - run:
           name: Frontend smoke test.
           command: |
             URL="http://udapeople-${CIRCLE_WORKFLOW_ID:0:7}.s3-website-us-east-1.amazonaws.com/#/employees"            
@@ -367,6 +354,25 @@ jobs:
             then
               # Change this to 0 after the job fails
               return 1
+            else
+              return 1
+            fi
+
+      - run:
+          name: Backend smoke test.
+          command: |
+            export BACKEND_IP=$(aws ec2 describe-instances --query 'Reservations[*].Instances[*].PublicIpAddress' --filters "Name=tag:project,Values=udapeople" --output text)
+            export API_URL="http://${BACKEND_IP}:3030"
+            echo "${API_URL}"
+            test_result=$(eval curl \
+              --verbose --fail \
+              --retry 360 --retry-max-time 1800 --retry-all-errors \
+              --url "$API_URL/api/status")
+            if echo $test_result | grep "ok" > /dev/null
+            then
+              echo "Backend test passed"
+              echo $test_result
+              return 0
             else
               return 1
             fi
