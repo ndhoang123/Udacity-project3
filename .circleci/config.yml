@@ -375,13 +375,15 @@ jobs:
           command: |
             echo "Wait 10 seconds for backend to become reachable"
             sleep 10
-            export BACKEND_IP=$(aws ec2 describe-instances \
-              --query 'Reservations[*].Instances[*].PublicIpAddress' \   
-              --filters "Name=tag:project,Values=udapeople" \          
-              --output text)
-
-            echo "BACKEND_IP: ${BACKEND_IP}"
-            curl "http://${BACKEND_IP}:3030/api/status"
+            export BACKEND_IP=$(aws ec2 describe-instances --query 'Reservations[*].Instances[*].PublicIpAddress' --filters "Name=tag:project,Values=udapeople" --output text)
+            export API_URL="http://${BACKEND_IP}:3030"
+            echo "${API_URL}"
+            if curl "${API_URL}/api/status" | grep "ok"
+            then
+              return 0
+            else
+              return 1
+            fi
 
       - destroy_environment:
           id: ${CIRCLE_WORKFLOW_ID:0:7}
