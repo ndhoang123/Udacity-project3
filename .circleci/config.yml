@@ -22,6 +22,9 @@ commands:
 
   revert_migrations:
     description: Revert the last migration.
+    parameters:
+      id:
+        type: string 
     steps:
       - run:
           name: Revert migrations
