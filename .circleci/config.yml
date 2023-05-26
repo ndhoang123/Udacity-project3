@@ -122,7 +122,9 @@ jobs:
             cd frontend
             npm install
             npm audit fix --force
+            npm audit fix --force
             npm audit --audit-level=critical
+
       - save_cache:
           paths: [frontend/node_modules]
           key: frontend-scan
