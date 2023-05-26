@@ -301,6 +301,8 @@ jobs:
       - checkout
       - add_ssh_keys:
           fingerprints: ["88:b6:b6:5e:e7:3f:0c:a9:73:8b:9d:49:53:48:e3:fd"]
+      - python/install-packages:
+          args: ansible
       - attach_workspace:
           at: .
       - run:
@@ -334,10 +336,11 @@ jobs:
           when: on_fail
 
   smoke-test:
-    docker:
-      - image: python:3.9.0-alpine
+    executor: aws-cli/default
     steps:
       - checkout
+      - exports
+      - aws-cli/setup
       - run:
           name: Install dependencies
           working_directory: /tmp
@@ -364,18 +367,13 @@ jobs:
             export BACKEND_IP=$(aws ec2 describe-instances --query 'Reservations[*].Instances[*].PublicIpAddress' --filters "Name=tag:project,Values=udapeople" --output text)
             export API_URL="http://${BACKEND_IP}:3030"
             echo "${API_URL}"
-            test_result=$(eval curl \
-              --verbose --fail \
-              --retry 360 --retry-max-time 1800 --retry-all-errors \
-              --url "$API_URL/api/status")
-            if echo $test_result | grep "ok" > /dev/null
+            if curl "${API_URL}/api/status" | grep "ok"
             then
-              echo "Backend test passed"
-              echo $test_result
               return 0
             else
               return 1
             fi
+
 
       - destroy_environment:
           id: ${CIRCLE_WORKFLOW_ID:0:7}
