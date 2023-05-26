@@ -321,7 +321,6 @@ jobs:
 
       - destroy_environment:
           id: ${CIRCLE_WORKFLOW_ID:0:7}
-          when: on_fail
 
       - revert_migrations:
           id: ${CIRCLE_WORKFLOW_ID:0:7}
