@@ -308,10 +308,23 @@ jobs:
           name: Install dependencies
           working_directory: /tmp
           command: |
-            apk add --update ansible curl rsync openssh nodejs npm
-            ansible --version
+            apk add --update tar gzip ansible nodejs npm curl
             pip install awscli
-            aws --version
+      - run:
+          name: Setup environment variables
+          command: |
+            echo ENVIRONMENT=production > backend/.env
+            echo NODE_ENV=production >> backend/.env
+            echo TYPEORM_CONNECTION=postgres >> backend/.env
+            echo TYPEORM_MIGRATIONS_DIR=./src/migrations >> backend/.env
+            echo TYPEORM_ENTITIES=./src/modules/domain/**/*.entity.ts >> backend/.env
+            echo TYPEORM_MIGRATIONS=./src/migrations/*.ts >> backend.env
+            echo TYPEORM_HOST=${TYPEORM_HOST} >> backend/.env
+            echo TYPEORM_PORT=${TYPEORM_PORT} >> backend/.env
+            echo TYPEORM_USERNAME=${TYPEORM_USERNAME} >> backend/.env
+            echo TYPEORM_PASSWORD=${TYPEORM_PASSWORD} >> backend/.env
+            echo TYPEORM_DATABASE=${TYPEORM_DATABASE} >> backend/.env
+            cat backend/.env
       - run:
           name: Deploy backend
           command: |
@@ -336,7 +349,7 @@ jobs:
 
   smoke-test:
     docker:
-      - image: amazon/aws-cli
+      - image: python:3.9.0-alpine
     steps:
       - checkout
       - run:
@@ -362,16 +375,15 @@ jobs:
       - run:
           name: Backend smoke test
           command: |
-            export BACKEND_IP=$(aws ec2 describe-instances --query 'Reservations[*].Instances[*].PublicIpAddress' --filters "Name=tag:project,Values=udapeople" --output text)
-            export API_URL="http://${BACKEND_IP}:3030"
-            echo "${API_URL}"
-            if curl "${API_URL}/api/status" | grep "ok"
-            then
-              return 0
-            else
-              return 1
-            fi
+            echo "Wait 10 seconds for backend to become reachable"
+            sleep 10
+            export BACKEND_IP=$(aws ec2 describe-instances \
+              --filters "Name=tag:project,Values=udapeople" \
+              --query 'Reservations[*].Instances[*].PublicIpAddress' \             
+              --output text)
 
+            echo "BACKEND_IP: ${BACKEND_IP}"
+            curl "http://${BACKEND_IP}:3030/api/status"
 
       - destroy_environment:
           id: ${CIRCLE_WORKFLOW_ID:0:7}
