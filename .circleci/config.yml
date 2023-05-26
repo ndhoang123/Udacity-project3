@@ -201,6 +201,7 @@ jobs:
           command: |
             apk add --update ansible
             ansible --version
+            pip install awscli
       - run:
           name: Setup environment variables
           command: |
@@ -218,10 +219,9 @@ jobs:
             cat backend/.env
       - run:
           name: Configure server
-          working_directory: ./.circleci/ansible
           command: |
-            cat inventory.txt
-            ansible-playbook -i inventory.txt configure-server.yml
+            cat .circleci/ansible/inventory.txt
+            ansible-playbook -i .circleci/ansible/inventory.txt .circleci/ansible/configure-server.yml
       - destroy_environment:
           id: ${CIRCLE_WORKFLOW_ID:0:7}
           when: on_fail   
