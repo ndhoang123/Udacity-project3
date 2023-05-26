@@ -302,8 +302,6 @@ jobs:
       - checkout
       - add_ssh_keys:
           fingerprints: ["88:b6:b6:5e:e7:3f:0c:a9:73:8b:9d:49:53:48:e3:fd"]
-      - python/install-packages:
-          args: ansible
       - attach_workspace:
           at: .
       - run:
