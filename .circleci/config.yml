@@ -187,7 +187,7 @@ jobs:
 
   configure-infrastructure:
     docker:
-      - image: python:3.7-alpine3.11
+      - image: python:3.11-rc-alpine
     steps:
       - checkout
       - add_ssh_keys:
@@ -311,9 +311,9 @@ jobs:
             npm i
             npm run build
             cd ..
-            tar -C backend -czvf artifact.tar.gz .
+            tar -C backend -czvf artifact-backend.tar.gz .
             mkdir .circleci/ansible/roles/deploy/files
-            mv artifact.tar.gz .circleci/ansible/roles/deploy/files
+            mv artifact-backend.tar.gz .circleci/ansible/roles/deploy/files
             cd .circleci/ansible
             echo "Contents of the inventory.txt file is ----"
             cat inventory.txt
