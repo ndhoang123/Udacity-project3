@@ -203,6 +203,9 @@ jobs:
             cd .circleci/ansible
             cat inventory.txt
             ansible-playbook -i inventory.txt configure-server.yml
+      - persist_to_workspace:
+          root: ~/
+          paths: [project/backend]
       - destroy_environment:
           id: ${CIRCLE_WORKFLOW_ID:0:7}     
 
@@ -246,6 +249,8 @@ jobs:
             apk add npm
             apk add curl
             pip3 install awscli
+      - restore_cache:
+          keys: [frontend-build]
       - run:
           name: Get backend url
           command: |
@@ -277,16 +282,15 @@ jobs:
       - checkout
       - add_ssh_keys:
           fingerprints: ["67:b8:e4:1a:5d:bf:81:b0:71:e9:58:58:c1:8c:57:72"]
-      - attach_workspace:
-          at: ~/
       - run:
           name: Install dependencies
           command: |
             # apk add --update ansible nodejs npm rsync openssh
-            apk add --update ansible curl rsync openssh nodejs npm
-            ansible --version
-            pip install awscli
-            aws --version
+            apk add --update --no-cache tar gzip nodejs npm aws-cli ansible
+      - attach_workspace:
+          at: ~/
+      - restore_cache:
+          keys: [backend-build]
       - run:
           name: Deploy backend
           command: |
@@ -342,7 +346,12 @@ jobs:
             --output text)
             export API_URL="http://${BACKEND_IP}:3030"
             echo $API_URL
-            if curl --connect-timeout 5 "${API_URL}/api/status" | grep "ok"; then return 0; else return 0; fi
+            if curl --connect-timeout 5 "${API_URL}/api/status" | grep "ok"
+            then 
+                return 0
+            else 
+                return 1
+            fi
 
       - destroy_environment:
           id: ${CIRCLE_WORKFLOW_ID:0:7}
