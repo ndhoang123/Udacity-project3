@@ -286,7 +286,7 @@ jobs:
           name: Install dependencies
           command: |
             # apk add --update ansible nodejs npm rsync openssh
-            apk add --update --no-cache tar gzip nodejs npm aws-cli ansible
+            apk add --update --no-cache tar gzip nodejs npm aws-cli ansible curl
       - attach_workspace:
           at: ~/
       - restore_cache:
