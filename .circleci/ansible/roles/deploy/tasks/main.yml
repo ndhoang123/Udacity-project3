@@ -1,19 +1,19 @@
 - name: "Creates directory"
   file:
-    path: ~/backend
-    state: directory
+    path: "~/backend"
+    state: "directory"
     mode: 0755
 
 - name: "Copy compressed backend folder"
   copy:
-    src: "artifact-backend.tar.gz"
-    dest: "~/backend/artifact-backend.tar.gz"
+    src: "../../artifact.tar.gz"
+    dest: "~/backend/artifact.tar.gz"
 
 
 - name: "Extract backend"
   unarchive:
     remote_src: yes
-    src: "~/backend/artifact-backend.tar.gz"
+    src: "~/backend/artifact.tar.gz"
     dest: "~/backend"
 
 - name: "Run the web server"
