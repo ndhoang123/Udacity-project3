@@ -1,27 +1,25 @@
 - name: "Creates directory"
-  become: yes
   file:
-    path: ~/server
+    path: ~/backend
     state: directory
-    mode: 0777
+    mode: 0755
 
 - name: "Copy compressed backend folder"
-  become: yes
   copy:
-    src: artifact-backend.tar.gz
-    dest: ~/server
+    src: "artifact-backend.tar.gz"
+    dest: "~/backend/artifact-backend.tar.gz"
+
 
 - name: "Extract backend"
-  become: yes
-  shell: |
-    cd ~/server
-    tar -vxf artifact-backend.tar.gz
-    rm -f artifact-backend.tar.gz
+  unarchive:
+    remote_src: yes
+    src: "~/backend/artifact-backend.tar.gz"
+    dest: "~/backend"
 
 - name: "Run the web server"
   shell:
     cmd: |
-      cd ~/server
+      cd ~/backend
       npm install
       pm2 stop default
-      pm2 start npm -- start
+      pm2 start npm -- start --wait-ready
