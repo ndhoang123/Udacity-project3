@@ -227,9 +227,8 @@ jobs:
           command: |
             URL="https://kvdb.io/wZf3ZNQhKyK4y7jbXKTyv/migration_${CIRCLE_WORKFLOW_ID:0:7}"
             echo ${URL} 
-            if grep -q "has been executed successfully." ~/project/backend/migrations_dump.txt
+            if grep -q "success" ~/project/backend/migrations_dump.txt
             then
-              # If you are using kvdb.io, generate the bucket ID "9GE4jRtKznmVKRfvdBABBe" in your local terminal first
               echo Successfully send status to kvdb.io
               curl --insecure ${URL}  -d '1'
             fi
