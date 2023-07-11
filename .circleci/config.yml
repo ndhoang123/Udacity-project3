@@ -358,15 +358,15 @@ jobs:
 
   cloudfront-update:
     docker:
-      - image: amazon/aws-cli
+      - image: python:3.7-alpine3.11
     steps:
       - checkout
+      - attach_workspace:
+          at: ~/
       - run:
           name: Install dependencies
           command: |
-            yum install -y tar gzip curl
-            curl -sL https://rpm.nodesource.com/setup_10.x | bash -
-            yum install -y nodejs
+            pip install awscli
       - run:
           name: Update cloudfront distribution
           command: |
@@ -398,9 +398,15 @@ jobs:
 
   cleanup:
     docker:
-      - image: amazon/aws-cli
+      - image: python:3.7-alpine3.11
     steps:
       - checkout
+      - attach_workspace:
+          at: ~/
+      - run:
+          name: Install dependencies
+          command: |
+            pip install awscli
       - run:
           name: Remove old stacks and files
           command: |
@@ -412,7 +418,7 @@ jobs:
 
             ## Fetch the stack names          
 
-            if [[ "${CIRCLE_WORKFLOW_ID:0:7}" != "${OldWorkflowID}" ]]
+            if [[ "udapeople-${CIRCLE_WORKFLOW_ID:0:7}" != "${OldWorkflowID}" ]]
             then
               echo '-----------------Clean s3--------------------'
               aws s3 rm "s3://udapeople-${OldWorkflowID}" --recursive
