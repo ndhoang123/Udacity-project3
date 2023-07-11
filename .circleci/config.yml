@@ -272,8 +272,7 @@ jobs:
       - destroy_environment:
           id: ${CIRCLE_WORKFLOW_ID:0:7}
 
-      - revert_migrations:
-          id: ${CIRCLE_WORKFLOW_ID:0:7}
+      - revert_migrations
 
   deploy-backend:
     docker:
@@ -303,24 +302,40 @@ jobs:
             echo "Contents of the inventory.txt file is ----"
             cat inventory.txt
             ansible-playbook -i inventory.txt deploy-backend.yml  
-
+      
+      - revert_migrations
       - destroy_environment:
           id: ${CIRCLE_WORKFLOW_ID:0:7}
 
-      - revert_migrations:
-          id: ${CIRCLE_WORKFLOW_ID:0:7}
 
   smoke-test:
     docker:
       - image: python:3.11-rc-alpine
     steps:
       - checkout
+      - attach_workspace:
+          at: ~/
       - run:
           name: Install dependencies
-          working_directory: /tmp
           command: |
             apk add --update curl nodejs npm
             pip install awscli
+      
+      - run:
+          name: Backend smoke test
+          command: |
+            export BACKEND_IP=$(aws ec2 describe-instances \
+            --query 'Reservations[*].Instances[*].PublicIpAddress' \
+            --filters Name=tag:aws:cloudformation:stack-name,Values=udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7} \
+            --output text)
+            export API_URL="http://${BACKEND_IP}:3030"
+            echo $API_URL
+            if curl -s "${API_URL}/api/status" | grep "ok"
+            then 
+                return 1
+            else 
+                return 1
+            fi
 
       - run:
           name: Frontend smoke test.
@@ -334,28 +349,11 @@ jobs:
             else
               return 1
             fi
-      
-      - run:
-          name: Backend smoke test
-          command: |
-            export BACKEND_IP=$(aws ec2 describe-instances \
-            --query 'Reservations[*].Instances[*].PublicIpAddress' \
-            --filters Name=tag:aws:cloudformation:stack-name,Values=udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7} \
-            --output text)
-            export API_URL="http://${BACKEND_IP}:3030"
-            echo $API_URL
-            if curl -s "${API_URL}/api/status" | grep "ok"
-            then 
-                return 0
-            else 
-                return 1
-            fi
 
       - destroy_environment:
           id: ${CIRCLE_WORKFLOW_ID:0:7}
 
-      - revert_migrations:
-          id: ${CIRCLE_WORKFLOW_ID:0:7}
+      - revert_migrations
 
   cloudfront-update:
     docker:
@@ -393,8 +391,7 @@ jobs:
       - destroy_environment:
           id: ${CIRCLE_WORKFLOW_ID:0:7}
 
-      - revert_migrations:
-          id: ${CIRCLE_WORKFLOW_ID:0:7}
+      - revert_migrations
 
   cleanup:
     docker:
