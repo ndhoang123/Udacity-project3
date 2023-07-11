@@ -412,19 +412,13 @@ jobs:
           command: |
             export OldWorkflowID=$(cat .circleci/files/OldWorkflowID.txt)
 
-            echo OldWorkflowID: "${OldWorkflowID}"
-
-            echo CIRCLE_WORKFLOW_ID "${CIRCLE_WORKFLOW_ID:0:7}"
-
             ## Fetch the stack names          
 
-            if [[ "udapeople-${CIRCLE_WORKFLOW_ID:0:7}" != "${OldWorkflowID}" ]]
+            if [[ "${CIRCLE_WORKFLOW_ID:0:7}" != "${OldWorkflowID}" ]]
             then
-              echo '-----------------Clean s3--------------------'
-              aws s3 rm "s3://udapeople-${OldWorkflowID}" --recursive
-              echo '-----------------Clean backend side--------------------'
+              echo '-----------------Clean Confirmed--------------------'
+              aws s3 rm "s3://${OldWorkflowID}" --recursive
               aws cloudformation delete-stack --stack-name "udapeople-backend-${OldWorkflowID}"
-              echo '-----------------Clean FE side--------------------'
               aws cloudformation delete-stack --stack-name "udapeople-frontend-${OldWorkflowID}"
             else
               echo '------------------Cannot cleanup----------------------'
